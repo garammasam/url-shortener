@@ -38,13 +38,24 @@ export class UrlService {
   }
 
   async getAllUrls() {
-    const { data, error } = await supabase
-      .from('urls')
-      .select('*')
-      .order('created_at', { ascending: false })
+    console.log('Fetching all URLs...')
+    try {
+      const { data, error } = await supabase
+        .from('urls')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    if (error) throw new Error('Failed to fetch URLs')
-    return data || []
+      if (error) {
+        console.error('Supabase error in getAllUrls:', error)
+        throw new Error(`Failed to fetch URLs: ${error.message}`)
+      }
+
+      console.log(`Found ${data?.length || 0} URLs`)
+      return data || []
+    } catch (error) {
+      console.error('Error in getAllUrls:', error)
+      throw error
+    }
   }
 
   async getUrlAnalytics(shortCode: string) {

@@ -56,31 +56,60 @@ bot.on('text', async (ctx) => {
 
 // Analytics command
 bot.command('analytics', async (ctx) => {
+  console.log('Analytics command received')
   try {
+    await ctx.reply('📊 Fetching analytics...')
     const allUrls = await urlService.getAllUrls()
+    console.log('Fetched URLs:', allUrls)
     
-    if (allUrls.length === 0) {
+    if (!allUrls || allUrls.length === 0) {
       return ctx.reply('No shortened URLs found. Use /shorten to create one!')
     }
 
-    let message = '📊 *URL Analytics*\n\n'
+    // Split URLs into chunks to avoid message length limits
+    const urlChunks = []
+    let currentChunk = ''
+    
     for (const url of allUrls) {
-      const shortUrl = `${process.env.BASE_URL}/${url.short_code}`
-      message += `*Short URL:* ${shortUrl}\n`
-      message += `*Original:* ${url.original_url}\n`
-      message += `*Clicks:* ${url.clicks}\n`
-      message += `*Created:* ${new Date(url.created_at).toLocaleDateString()}\n`
-      if (url.last_accessed) {
-        message += `*Last Click:* ${new Date(url.last_accessed).toLocaleDateString()}\n`
+      const urlMessage = 
+        `🔗 *Short URL:*\n` +
+        `${process.env.BASE_URL}/${url.short_code}\n\n` +
+        `📎 *Original:*\n` +
+        `${url.original_url}\n\n` +
+        `👆 *Clicks:* ${url.clicks}\n` +
+        `📅 *Created:* ${new Date(url.created_at).toLocaleDateString()}\n` +
+        (url.last_accessed ? `🕒 *Last Click:* ${new Date(url.last_accessed).toLocaleDateString()}\n` : '') +
+        `\n---\n\n`
+
+      // If adding this URL would exceed message limit, start new chunk
+      if (currentChunk.length + urlMessage.length > 3500) {
+        urlChunks.push(currentChunk)
+        currentChunk = urlMessage
+      } else {
+        currentChunk += urlMessage
       }
-      message += '\n'
+    }
+    
+    // Add the last chunk
+    if (currentChunk) {
+      urlChunks.push(currentChunk)
     }
 
-    ctx.replyWithMarkdown(message)
+    // Send each chunk as a separate message
+    for (const chunk of urlChunks) {
+      await ctx.reply(chunk, { parse_mode: 'Markdown' })
+    }
+
   } catch (error) {
-    console.error('Error fetching analytics:', error)
-    ctx.reply('Sorry, could not fetch analytics at this time.')
+    console.error('Error in analytics command:', error)
+    ctx.reply(`Sorry, could not fetch analytics: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
+})
+
+// Error handling
+bot.catch((err, ctx) => {
+  console.error('Bot error:', err)
+  ctx.reply('An error occurred while processing your request.')
 })
 
 // Start the bot
