@@ -37,6 +37,16 @@ export class UrlService {
     }
   }
 
+  async getAllUrls() {
+    const { data, error } = await supabase
+      .from('urls')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw new Error('Failed to fetch URLs')
+    return data || []
+  }
+
   async getUrlAnalytics(shortCode: string) {
     const { data, error } = await supabase
       .from('urls')

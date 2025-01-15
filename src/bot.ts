@@ -1,4 +1,4 @@
-import { Telegraf } from 'telegraf'
+import { Telegraf, Markup } from 'telegraf'
 import dotenv from 'dotenv'
 import { UrlService } from './services/urlService'
 
@@ -9,54 +9,78 @@ const urlService = new UrlService()
 
 // Start command
 bot.command('start', (ctx) => {
+  const keyboard = Markup.keyboard([
+    ['/shorten', '/analytics'],
+  ]).resize()
+
   ctx.reply(
     'Welcome to URL Shortener Bot! 🔗\n\n' +
-    'Commands:\n' +
-    '/shorten <url> - Shorten a URL\n' +
-    '/analytics <short_code> - Get analytics for a shortened URL'
+    'Choose a command:\n' +
+    '• /shorten - Create a new short URL\n' +
+    '• /analytics - View analytics for all URLs',
+    keyboard
   )
 })
 
 // Shorten URL command
 bot.command('shorten', async (ctx) => {
-  const url = ctx.message.text.split(' ')[1]
-  if (!url) {
-    return ctx.reply('Please provide a URL to shorten.\nExample: /shorten https://example.com')
-  }
-
-  try {
-    const shortUrl = await urlService.shortenUrl(url)
-    ctx.reply(`Here's your shortened URL: ${shortUrl}`)
-  } catch (error) {
-    console.error('Error in shorten command:', error)
-    ctx.reply(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`)
-  }
+  ctx.reply('Please send me the URL you want to shorten 🔗')
 })
 
-// Get analytics command
-bot.command('analytics', async (ctx) => {
-  const shortCode = ctx.message.text.split(' ')[1]
-  if (!shortCode) {
-    return ctx.reply('Please provide a short code.\nExample: /analytics abc123')
-  }
+// Handle URLs for shortening
+bot.on('text', async (ctx) => {
+  const text = ctx.message.text
 
+  // Ignore commands
+  if (text.startsWith('/')) return
+
+  // Check if text is a valid URL
   try {
-    const analytics = await urlService.getUrlAnalytics(shortCode)
+    new URL(text)
+    const shortUrl = await urlService.shortenUrl(text)
     ctx.reply(
-      `📊 Analytics for ${shortCode}:\n\n` +
-      `Original URL: ${analytics.original_url}\n` +
-      `Total Clicks: ${analytics.clicks}\n` +
-      `Created: ${new Date(analytics.created_at).toLocaleDateString()}\n` +
-      `Last Accessed: ${analytics.last_accessed ? new Date(analytics.last_accessed).toLocaleDateString() : 'Never'}`
+      `✅ URL shortened successfully!\n\n` +
+      `Original: ${text}\n` +
+      `Shortened: ${shortUrl}\n\n` +
+      `Use /analytics to track clicks`
     )
   } catch (error) {
-    ctx.reply('Sorry, could not find analytics for this URL.')
+    if (error instanceof TypeError) {
+      ctx.reply('❌ Please send a valid URL (e.g., https://example.com)')
+    } else {
+      console.error('Error in URL shortening:', error)
+      ctx.reply('Sorry, there was an error shortening your URL.')
+    }
   }
 })
 
-// Handle invalid commands
-bot.on('text', (ctx) => {
-  ctx.reply('Sorry, I don\'t understand that command. Use /start to see available commands.')
+// Analytics command
+bot.command('analytics', async (ctx) => {
+  try {
+    const allUrls = await urlService.getAllUrls()
+    
+    if (allUrls.length === 0) {
+      return ctx.reply('No shortened URLs found. Use /shorten to create one!')
+    }
+
+    let message = '📊 *URL Analytics*\n\n'
+    for (const url of allUrls) {
+      const shortUrl = `${process.env.BASE_URL}/${url.short_code}`
+      message += `*Short URL:* ${shortUrl}\n`
+      message += `*Original:* ${url.original_url}\n`
+      message += `*Clicks:* ${url.clicks}\n`
+      message += `*Created:* ${new Date(url.created_at).toLocaleDateString()}\n`
+      if (url.last_accessed) {
+        message += `*Last Click:* ${new Date(url.last_accessed).toLocaleDateString()}\n`
+      }
+      message += '\n'
+    }
+
+    ctx.replyWithMarkdown(message)
+  } catch (error) {
+    console.error('Error fetching analytics:', error)
+    ctx.reply('Sorry, could not fetch analytics at this time.')
+  }
 })
 
 // Start the bot
