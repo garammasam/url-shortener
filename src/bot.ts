@@ -35,42 +35,7 @@ bot.command('shorten', async (ctx) => {
   ctx.reply('Please send me the URL you want to shorten 🔗')
 })
 
-// Handle URLs for shortening
-bot.on('text', async (ctx) => {
-  const text = ctx.message.text
-  console.log('Received text message:', { userId: ctx.from?.id, text })
-
-  // Ignore commands
-  if (text.startsWith('/')) {
-    console.log('Ignoring command message:', text)
-    return
-  }
-
-  // Check if text is a valid URL
-  try {
-    console.log('Attempting to validate URL:', text)
-    new URL(text)
-    console.log('URL is valid, attempting to shorten')
-    const shortUrl = await urlService.shortenUrl(text)
-    console.log('URL shortened successfully:', shortUrl)
-    ctx.reply(
-      `✅ URL shortened successfully!\n\n` +
-      `Original: ${text}\n` +
-      `Shortened: ${shortUrl}\n\n` +
-      `Use /analytics to track clicks`
-    )
-  } catch (error) {
-    if (error instanceof TypeError) {
-      console.log('Invalid URL received:', text)
-      ctx.reply('❌ Please send a valid URL (e.g., https://example.com)')
-    } else {
-      console.error('Error in URL shortening:', error)
-      ctx.reply('Sorry, there was an error shortening your URL.')
-    }
-  }
-})
-
-// Analytics command
+// Analytics command - MUST be before the text handler
 bot.command('analytics', async (ctx) => {
   const userId = ctx.from?.id
   console.log('Analytics command received from:', userId)
@@ -129,6 +94,41 @@ bot.command('analytics', async (ctx) => {
   } catch (error) {
     console.error('Error in analytics command:', error)
     ctx.reply(`Sorry, could not fetch analytics: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
+})
+
+// Handle URLs for shortening - This should be the last handler
+bot.on('text', async (ctx) => {
+  const text = ctx.message.text
+  
+  // Skip if this is a command - this check should be first
+  if (text.startsWith('/')) {
+    return
+  }
+  
+  console.log('Received potential URL:', { userId: ctx.from?.id, text })
+
+  // Check if text is a valid URL
+  try {
+    console.log('Attempting to validate URL:', text)
+    new URL(text)
+    console.log('URL is valid, attempting to shorten')
+    const shortUrl = await urlService.shortenUrl(text)
+    console.log('URL shortened successfully:', shortUrl)
+    ctx.reply(
+      `✅ URL shortened successfully!\n\n` +
+      `Original: ${text}\n` +
+      `Shortened: ${shortUrl}\n\n` +
+      `Use /analytics to track clicks`
+    )
+  } catch (error) {
+    if (error instanceof TypeError) {
+      console.log('Invalid URL received:', text)
+      ctx.reply('❌ Please send a valid URL (e.g., https://example.com)')
+    } else {
+      console.error('Error in URL shortening:', error)
+      ctx.reply('Sorry, there was an error shortening your URL.')
+    }
   }
 })
 
