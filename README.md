@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Telegram URL Shortener Bot
 
-## Getting Started
+A Telegram bot that shortens URLs and tracks click analytics using Supabase as the backend.
 
-First, run the development server:
+## Features
 
+- Shorten URLs with custom short codes
+- Track click analytics
+- View URL statistics
+- Easy to deploy on Render
+
+## Prerequisites
+
+- Node.js 16+
+- Telegram Bot Token (from [@BotFather](https://t.me/botfather))
+- Supabase account and project
+
+## Setup
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file with the following variables:
+   ```
+   BOT_TOKEN=your_telegram_bot_token
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_KEY=your_supabase_anon_key
+   BASE_URL=your_base_url
+   ```
+
+4. Set up Supabase:
+   - Create a new table named `urls` with the following schema:
+     ```sql
+     create table urls (
+       id uuid default uuid_generate_v4() primary key,
+       original_url text not null,
+       short_code text not null unique,
+       created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+       clicks integer default 0 not null,
+       last_accessed timestamp with time zone
+     );
+
+     -- Create function to increment clicks
+     create or replace function increment_clicks()
+     returns integer
+     language sql
+     as $$
+       select clicks + 1 from urls where id = current_setting('myapp.user_id')::uuid
+     $$;
+     ```
+
+## Development
+
+Run the bot locally:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Production Build
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Build the project:
+   ```bash
+   npm run build
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Start the bot:
+   ```bash
+   npm start
+   ```
 
-## Learn More
+## Bot Commands
 
-To learn more about Next.js, take a look at the following resources:
+- `/start` - Display welcome message and available commands
+- `/shorten <url>` - Shorten a URL
+- `/analytics <short_code>` - Get analytics for a shortened URL
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment on Render
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Create a new Web Service on Render
+2. Connect your repository
+3. Set the following:
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+4. Add your environment variables in the Render dashboard
+5. Deploy! 

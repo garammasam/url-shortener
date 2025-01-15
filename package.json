@@ -1,46 +1,40 @@
 {
   "name": "link-shortener",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "main": "dist/bot.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push"
+    "build": "tsc",
+    "start": "node dist/server.js & node dist/bot.js & node dist/uptime.js",
+    "dev": "ts-node src/server.ts & ts-node src/bot.ts",
+    "dev:bot": "ts-node src/bot.ts",
+    "dev:server": "ts-node src/server.ts",
+    "dev:uptime": "ts-node src/uptime.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garammasam/url-shortener.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/garammasam/url-shortener/issues"
+  },
+  "homepage": "https://github.com/garammasam/url-shortener#readme",
+  "description": "",
   "dependencies": {
-    "@hookform/resolvers": "^3.3.4",
-    "@prisma/client": "^5.9.1",
-    "@radix-ui/react-dialog": "^1.0.5",
-    "@radix-ui/react-label": "^2.0.2",
-    "@radix-ui/react-slot": "^1.0.2",
-    "@tanstack/react-query": "^5.18.1",
-    "axios": "^1.6.7",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
-    "lucide-react": "^0.321.0",
-    "nanoid": "^5.0.5",
-    "next": "14.1.0",
-    "next-themes": "^0.4.4",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-hook-form": "^7.50.0",
-    "sonner": "^1.7.1",
-    "tailwind-merge": "^2.2.1",
-    "zod": "^3.22.4"
+    "@supabase/supabase-js": "^2.39.7",
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.11.24",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "nanoid": "^3.3.7",
+    "telegraf": "^4.16.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.1.0",
-    "postcss": "^8",
-    "prisma": "^5.9.1",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5"
+    "@types/nanoid": "^3.0.0"
   }
 }
