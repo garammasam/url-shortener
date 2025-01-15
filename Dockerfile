@@ -8,17 +8,19 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy tsconfig and source code
+COPY tsconfig.json ./
+COPY src ./src
+COPY start.sh ./
 
-# Build TypeScript
+# Build TypeScript files
 RUN npm run build
+
+# Make start script executable
+RUN chmod +x start.sh
 
 # Expose port
 EXPOSE 3000
 
-# Start all services using a shell script
-COPY start.sh .
-RUN chmod +x start.sh
-
+# Start the application
 CMD ["./start.sh"] 
