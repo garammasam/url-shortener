@@ -49,10 +49,10 @@ export default function StatsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <Spinner className="h-8 w-8 mb-4" />
-          <p className="text-lg">Loading statistics...</p>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Spinner className="h-8 w-8" />
+          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">Loading statistics...</p>
         </div>
       </div>
     )
@@ -60,12 +60,12 @@ export default function StatsPage() {
 
   if (!stats) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg text-red-600 dark:text-red-400 mb-4">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <p className="text-xl font-medium text-red-600 dark:text-red-400">
             URL not found
           </p>
-          <Button onClick={() => window.location.href = '/'}>
+          <Button onClick={() => window.location.href = '/'} size="lg">
             Back to Home
           </Button>
         </div>
@@ -74,59 +74,72 @@ export default function StatsPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">URL Statistics</h1>
-        
-        <div className="mb-8 rounded-lg bg-white dark:bg-gray-800 p-6 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">URL Details</h2>
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
+      <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
           <div className="space-y-2">
-            <p>
-              <span className="font-medium">Original URL:</span>{' '}
-              <a href={stats.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                {stats.url}
-              </a>
-            </p>
-            <p>
-              <span className="font-medium">Short URL:</span>{' '}
-              <a href={`/${stats.shortId}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                {`${window.location.origin}/${stats.shortId}`}
-              </a>
-            </p>
-            <p>
-              <span className="font-medium">Total Clicks:</span>{' '}
-              {stats.clicks.length}
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-50 sm:text-4xl">
+              URL Statistics
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              Detailed analytics for your shortened URL
             </p>
           </div>
-        </div>
+          
+          <div className="mt-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">URL Details</h2>
+            <div className="space-y-3">
+              <div>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Original URL:</span>{' '}
+                <a href={stats.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline break-all">
+                  {stats.url}
+                </a>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Short URL:</span>{' '}
+                <a href={`/${stats.shortId}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  {`${window.location.origin}/${stats.shortId}`}
+                </a>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Clicks:</span>{' '}
+                <span className="text-gray-900 dark:text-gray-50 font-medium">{stats.clicks.length}</span>
+              </div>
+            </div>
+          </div>
 
-        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Click History</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="border-b dark:border-gray-700 text-left">
-                  <th className="pb-2">Date</th>
-                  <th className="pb-2">IP Address</th>
-                  <th className="pb-2">User Agent</th>
-                  <th className="pb-2">Referer</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.clicks.map((click) => (
-                  <tr key={click.id} className="border-b dark:border-gray-700">
-                    <td className="py-2">
-                      {new Date(click.createdAt).toLocaleString()}
-                    </td>
-                    <td className="py-2">{click.ipAddress || 'N/A'}</td>
-                    <td className="py-2 max-w-xs truncate">
-                      {click.userAgent || 'N/A'}
-                    </td>
-                    <td className="py-2">{click.referer || 'N/A'}</td>
+          <div className="mt-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-6">Click History</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">IP Address</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">User Agent</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">Referer</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats.clicks.map((click) => (
+                    <tr key={click.id} className="border-b border-gray-200 dark:border-gray-700">
+                      <td className="py-3 px-4 text-sm text-gray-900 dark:text-gray-100">
+                        {new Date(click.createdAt).toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900 dark:text-gray-100">
+                        {click.ipAddress || 'N/A'}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate">
+                        {click.userAgent || 'N/A'}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900 dark:text-gray-100">
+                        {click.referer || 'N/A'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
