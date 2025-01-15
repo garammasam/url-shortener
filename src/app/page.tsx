@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 
 const urlSchema = z.object({
   url: z.string().url('Please enter a valid URL'),
@@ -33,13 +35,25 @@ export default function Home() {
 
       const result = await response.json()
       if (response.ok) {
-        setShortUrl(`${window.location.origin}/${result.shortId}`)
+        const newShortUrl = `${window.location.origin}/${result.shortId}`
+        setShortUrl(newShortUrl)
         reset()
+        toast.success('URL shortened successfully!')
       } else {
-        console.error('Error creating short URL:', result.error)
+        toast.error(result.error || 'Failed to shorten URL')
       }
     } catch (error) {
+      toast.error('Failed to shorten URL')
       console.error('Error creating short URL:', error)
+    }
+  }
+
+  const handleCopy = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy URL')
     }
   }
 
@@ -64,6 +78,7 @@ export default function Home() {
               id="url"
               placeholder="Enter your URL here"
               className="w-full rounded-md border border-gray-300 dark:border-gray-700 px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-800 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              disabled={isSubmitting}
             />
             {errors.url && (
               <p className="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -77,7 +92,14 @@ export default function Home() {
             disabled={isSubmitting}
             className="w-full"
           >
-            {isSubmitting ? 'Shortening...' : 'Shorten URL'}
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2" />
+                Shortening...
+              </>
+            ) : (
+              'Shorten URL'
+            )}
           </Button>
         </form>
 
@@ -94,9 +116,7 @@ export default function Home() {
                 className="w-full rounded-md border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
               <Button
-                onClick={() => {
-                  navigator.clipboard.writeText(shortUrl)
-                }}
+                onClick={() => handleCopy(shortUrl)}
                 variant="outline"
                 className="shrink-0"
               >
