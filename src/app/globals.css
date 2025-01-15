@@ -71,6 +71,20 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .bg-background {
+    @apply bg-white dark:bg-gray-950;
+  }
+  
+  .text-primary {
+    @apply text-gray-900 dark:text-gray-50;
+  }
+  
+  .border-primary {
+    @apply border-gray-200 dark:border-gray-800;
   }
 }
